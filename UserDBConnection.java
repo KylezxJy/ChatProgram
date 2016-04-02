@@ -20,7 +20,7 @@ public class UserDBConnection {
     // password of MySQL database
     public static final String DBPASS = "mysqladmin";
 
-    public void insert(String name, String password, String sex, int age, String birthday, String email) throws Exception {
+    public void insertInfo(String name, String password, String sex, int age, String birthday, String email) throws Exception {
         Connection conn = null;
         Statement stmt = null;
         Class.forName(DBDRIVER);
@@ -32,12 +32,12 @@ public class UserDBConnection {
         conn.close();
     }
 
-    public boolean search(String name, String password) throws Exception {
+    public boolean searchInfo(String name) throws Exception {
         Connection conn = null;
         Statement stmt = null;
         ResultSet rs = null;
         Class.forName(DBDRIVER);
-        String sqlSelect = "SELECT id FROM userinfo WHERE name='" + name + "' AND password = '" + password + "'";
+        String sqlSelect = "SELECT name FROM userinfo WHERE name='" + name + "';";
         conn = DriverManager.getConnection(DBURL, DBUSER, DBPASS);
         stmt = conn.createStatement();
         rs = stmt.executeQuery(sqlSelect);
@@ -46,5 +46,99 @@ public class UserDBConnection {
         stmt.close();
         conn.close();
         return result;
+    }
+
+    public boolean searchInfo(String name, String password) throws Exception {
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        Class.forName(DBDRIVER);
+        String sqlSelect = "SELECT name FROM userinfo WHERE name='" + name + "' AND password = '" + password + "';";
+        conn = DriverManager.getConnection(DBURL, DBUSER, DBPASS);
+        stmt = conn.createStatement();
+        rs = stmt.executeQuery(sqlSelect);
+        boolean result = rs.next();
+        rs.close();
+        stmt.close();
+        conn.close();
+        return result;
+    }
+
+    public void insertTemp(String ip, String name, String password) throws Exception {
+        Connection conn = null;
+        Statement stmt = null;
+        Class.forName(DBDRIVER);
+        String sqlInsert = "INSERT INTO usertemp(ip,name,password) VALUES ('" + ip + "','" + name + "','" + password + "');";
+        conn = DriverManager.getConnection(DBURL, DBUSER, DBPASS);
+        stmt = conn.createStatement();
+        stmt.executeUpdate(sqlInsert);
+        stmt.close();
+        conn.close();
+    }
+
+    public void deleteTemp(String ip) throws Exception {
+        Connection conn = null;
+        Statement stmt = null;
+        Class.forName(DBDRIVER);
+        String sqlInsert = "DELETE FROM usertemp WHERE ip='" + ip + "';";
+        conn = DriverManager.getConnection(DBURL, DBUSER, DBPASS);
+        stmt = conn.createStatement();
+        stmt.executeUpdate(sqlInsert);
+        stmt.close();
+        conn.close();
+    }
+
+    public boolean searchTemp(String ip) throws Exception {
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        Class.forName(DBDRIVER);
+        String sqlSelect = "SELECT name FROM usertemp WHERE ip='" + ip + "';";
+        conn = DriverManager.getConnection(DBURL, DBUSER, DBPASS);
+        stmt = conn.createStatement();
+        rs = stmt.executeQuery(sqlSelect);
+        boolean result = rs.next();
+        rs.close();
+        stmt.close();
+        conn.close();
+        return result;
+    }
+
+    public String getName(String ip) throws Exception {
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        Class.forName(DBDRIVER);
+        String sqlSelect = "SELECT name FROM usertemp WHERE ip='" + ip + "';";
+        conn = DriverManager.getConnection(DBURL, DBUSER, DBPASS);
+        stmt = conn.createStatement();
+        rs = stmt.executeQuery(sqlSelect);
+        String name = null;
+        if (rs.next()) {
+            name = rs.getString(1);
+        }
+        rs.close();
+        stmt.close();
+        conn.close();
+        return name;
+    }
+
+    public String getPass(String ip) throws Exception {
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        Class.forName(DBDRIVER);
+        String sqlSelect = "SELECT password FROM usertemp WHERE ip='" + ip + "';";
+        conn = DriverManager.getConnection(DBURL, DBUSER, DBPASS);
+        stmt = conn.createStatement();
+        rs = stmt.executeQuery(sqlSelect);
+        String pass = null;
+        if (rs.next()) {
+            pass = rs.getString(1);
+        }
+        rs.close();
+        stmt.close();
+        conn.close();
+        return pass;
     }
 }

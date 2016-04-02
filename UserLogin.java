@@ -1,7 +1,8 @@
 package chatprogram;
 
 import java.sql.SQLException;
-import chatprogram.UserSignin;
+import chatprogram.UserSignup;
+import java.net.InetAddress;
 
 public class UserLogin extends javax.swing.JFrame {
 
@@ -24,11 +25,17 @@ public class UserLogin extends javax.swing.JFrame {
         jPanel3 = new javax.swing.JPanel();
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
+        jCheckBox1 = new javax.swing.JCheckBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Welcome!");
         setBackground(new java.awt.Color(255, 255, 255));
         setResizable(false);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowOpened(java.awt.event.WindowEvent evt) {
+                formWindowOpened(evt);
+            }
+        });
 
         jPanel1.setBackground(new java.awt.Color(255, 255, 153));
         jPanel1.setPreferredSize(new java.awt.Dimension(500, 120));
@@ -38,7 +45,7 @@ public class UserLogin extends javax.swing.JFrame {
         jLabel3.setPreferredSize(new java.awt.Dimension(200, 50));
 
         jLabel4.setFont(new java.awt.Font("Times New Roman", 0, 14)); // NOI18N
-        jLabel4.setText("Sign In");
+        jLabel4.setText("Sign Up");
         jLabel4.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jLabel4MouseClicked(evt);
@@ -133,6 +140,10 @@ public class UserLogin extends javax.swing.JFrame {
             }
         });
 
+        jCheckBox1.setBackground(new java.awt.Color(255, 255, 153));
+        jCheckBox1.setFont(new java.awt.Font("Times New Roman", 0, 14)); // NOI18N
+        jCheckBox1.setText("Remember Me");
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
@@ -143,15 +154,21 @@ public class UserLogin extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 60, Short.MAX_VALUE)
                 .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(70, 70, 70))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jCheckBox1)
+                .addGap(22, 22, 22))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
-                .addGap(10, 10, 10)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jCheckBox1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 7, Short.MAX_VALUE)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(30, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -171,8 +188,7 @@ public class UserLogin extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
+                .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE))
         );
 
         pack();
@@ -183,9 +199,16 @@ public class UserLogin extends javax.swing.JFrame {
         String password = new String(jPasswordField1.getPassword());
         UserDBConnection uc = new UserDBConnection();
         try {
-            System.out.println(uc.search(name, password));
-        } catch (Exception e) {
-            e.printStackTrace();
+            InetAddress addr = InetAddress.getLocalHost();
+            String ip = addr.getHostAddress();
+            if (uc.searchInfo(name, password)) {
+                System.out.println("Successfully Log In");
+                if (jCheckBox1.isSelected()) {
+                    uc.insertTemp(ip, name, password);
+                }
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
     }                                        
 
@@ -195,32 +218,25 @@ public class UserLogin extends javax.swing.JFrame {
     }                                        
 
     private void jLabel4MouseClicked(java.awt.event.MouseEvent evt) {                                     
-        new UserSignin().setVisible(true);
+        new UserSignup().setVisible(true);
     }                                    
 
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
+    private void formWindowOpened(java.awt.event.WindowEvent evt) {                                  
+        UserDBConnection uc = new UserDBConnection();
         try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
+            InetAddress addr = InetAddress.getLocalHost();
+            String ip = addr.getHostAddress();
+            if (uc.searchTemp(ip)) {
+                jTextField1.setText(uc.getName(ip));
+                jPasswordField1.setText(uc.getPass(ip));
+                uc.deleteTemp(ip);
             }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(UserLogin.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(UserLogin.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(UserLogin.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(UserLogin.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
-        //</editor-fold>
+    }                                 
+
+    public static void main(String args[]) {
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
@@ -233,6 +249,7 @@ public class UserLogin extends javax.swing.JFrame {
     // Variables declaration - do not modify                     
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
+    private javax.swing.JCheckBox jCheckBox1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
